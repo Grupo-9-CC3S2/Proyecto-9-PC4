@@ -5,9 +5,9 @@ provider "kubernetes" {
 resource "kubernetes_deployment" "app" {
     
   metadata {
-    name = "miapp"
+    name = "nginx-deployment"
     labels = {
-      app = "miapp"
+      app = "nginx-app-deployment"
     }
   }
 
@@ -15,18 +15,18 @@ resource "kubernetes_deployment" "app" {
     replicas = 2
     selector {
       match_labels = {
-        app = "miapp"
+        app = "nginx-app"
       }
     }
     template {
       metadata {
         labels = {
-          app = "miapp"
+          app = "nginx-app"
         }
       }
       spec {
         container {
-          name  = "miapp"
+          name  = "web-contenedor"
           image = "nginx:1.25"
           port {
             container_port = 80
@@ -43,7 +43,7 @@ resource "kubernetes_service" "app" {
   }
   spec {
     selector = {
-      app = kubernetes_deployment.app.metadata[0].labels.app
+      app = "nginx-app"
     }
     port {
       port        = 80
