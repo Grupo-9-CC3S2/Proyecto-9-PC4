@@ -1,0 +1,17 @@
+#!/bin/bash
+
+#Verifica que terraform.tfstate esté actualizado
+cd iac
+terraform plan -detailed-exitcode -no-color > /dev/null
+PLAN_EXIT=$?
+if [ "$PLAN_EXIT" -eq 2 ]; then
+    echo "tfstate DESACTUALIZADO. Ejecuta 'terraform apply' antes de commitear." >&2
+    exit 1
+elif [ "$PLAN_EXIT" -eq 1 ]; then
+    echo "Error al ejecutar 'terraform plan'. Revisa tu configuración." >&2
+    exit 1
+fi
+cd ..
+
+#Todo OK
+exit 0
