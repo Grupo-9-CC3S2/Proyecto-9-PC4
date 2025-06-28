@@ -144,19 +144,27 @@ def comparar(estado_deseado, estado_real):
     tabla.field_names = ["Recurso", "Atributo", "Valor deseado", "Valor real"]
 
     print("\nTabla de comparación de atributos del deployment y el service:")
+    drift = False
     for clave in ["replicas", "image", "container_port", "container_name"]:
         valor_deseado = estado_deseado["deployment"].get(clave)
         valor_real = estado_real["deployment"].get(clave)
 
+        # Se comparan los valores y se detecta si hay drift o no
+        if str(valor_deseado) != str(valor_real):
+            drift = True
         tabla.add_row(["deployment", clave, valor_deseado, valor_real])
 
     for clave in ["port", "target_port", "type"]:
         valor_deseado = estado_deseado["service"].get(clave)
         valor_real = estado_real["service"].get(clave)
 
+        # Se comparan los valores y se detecta si hay drift o no
+        if str(valor_deseado) != str(valor_real):
+            drift = True
         tabla.add_row(["service", clave, valor_deseado, valor_real])
 
     print(tabla)
+    return drift
 
 
 if __name__ == "__main__":
@@ -166,4 +174,8 @@ if __name__ == "__main__":
             "iac/terraform.tfstate"))
     estado_deseado = obtener_estado_deseado(tfstate)
     estado_real = obtener_estado_real()
-    comparar(estado_deseado, estado_real)
+    drift = comparar(estado_deseado, estado_real)
+    if drift:
+        exit(1)
+    else:
+        exit(0)
