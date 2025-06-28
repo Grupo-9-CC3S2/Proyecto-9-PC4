@@ -148,15 +148,15 @@ def comparar(estado_deseado, estado_real):
         valor_deseado = estado_deseado["deployment"].get(clave)
         valor_real = estado_real["deployment"].get(clave)
 
-        tabla.add_row (["deployment", clave, valor_deseado, valor_real])
+        tabla.add_row(["deployment", clave, valor_deseado, valor_real])
 
     for clave in ["port", "target_port", "type"]:
         valor_deseado = estado_deseado["service"].get(clave)
         valor_real = estado_real["service"].get(clave)
 
-        tabla.add_row (["service", clave, valor_deseado, valor_real])
+        tabla.add_row(["service", clave, valor_deseado, valor_real])
 
-    print (tabla)
+    print(tabla)
 
 
 if __name__ == "__main__":
