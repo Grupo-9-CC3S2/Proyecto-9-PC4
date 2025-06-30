@@ -1,0 +1,56 @@
+{
+    "type": "object",
+    "properties": {
+        "deployment_name": {
+            "type": "string",
+            "minLength": 1
+        },
+        "deployment_replicas": {
+            "type": "integer",
+            "minimum": 1
+        },
+        "container_image": {
+            "type": "string",
+            "pattern": "^[\\w\\-/]+:[\\d\\.]+$"
+        },
+        "container_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+        },
+        "service_name": {
+            "type": "string",
+            "minLength": 1
+        },
+        "service_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+        },
+        "service_target_port": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535
+        },
+        "service_type": {
+            "type": "string",
+            "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+        },
+        "service_cluster_ip": {
+            "type": "string",
+            "format": "ipv4"
+        }
+    },
+    "required": [
+        "deployment_name",
+        "deployment_replicas",
+        "container_image",
+        "container_port",
+        "service_name",
+        "service_port",
+        "service_target_port",
+        "service_type",
+        "service_cluster_ip"
+    ],
+    "additionalProperties": false
+}
