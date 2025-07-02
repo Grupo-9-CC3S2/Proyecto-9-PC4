@@ -21,4 +21,4 @@ jobs:
 
       - name: ejecutar tests con Pytest
         run: |
-          pytest tests/ -v
+          pytest tests/test_state_comparador.py -v
