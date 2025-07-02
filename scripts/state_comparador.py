@@ -1,6 +1,7 @@
 import json
 import subprocess
 import os
+from prettytable import PrettyTable
 
 CARPETA_ACTUAL = os.path.abspath(__file__)
 CARPETA_RAIZ = os.path.dirname(os.path.dirname(CARPETA_ACTUAL))
@@ -50,7 +51,8 @@ def obtener_estado_deseado(tfstate):
             estado["deployment"] = {
                 "replicas": atributos["spec"][0]["replicas"],
                 "image": container["image"],
-                "container_port": container["port"][0]["container_port"]
+                "container_port": container["port"][0]["container_port"],
+                "container_name": container["name"]
             }
 
             NOMBRE_DEPLOYMENT = atributos["metadata"][0]["name"]
@@ -61,7 +63,8 @@ def obtener_estado_deseado(tfstate):
 
             estado["service"] = {
                 "port": port["port"],
-                "target_port": port["target_port"]
+                "target_port": port["target_port"],
+                "type": atributos["spec"][0]["type"]
             }
 
             NOMBRE_SERVICE = atributos["metadata"][0]["name"]
@@ -100,7 +103,8 @@ def obtener_estado_real():
         "replicas": estado_deployment["spec"]["replicas"],
         "image": estado_deployment["spec"]["template"]["spec"]["containers"][0]["image"],
         "container_port": estado_deployment["spec"]["template"]["spec"]["containers"][0]
-        ["ports"][0]["containerPort"]
+        ["ports"][0]["containerPort"],
+        "container_name": estado_deployment["spec"]["template"]["spec"]["containers"][0]["name"]
     }
 
     # Se obtiene el estado real del Service con kubectl
@@ -120,7 +124,8 @@ def obtener_estado_real():
 
     estado["service"] = {
         "port": estado_service["spec"]["ports"][0]["port"],
-        "target_port": estado_service["spec"]["ports"][0]["targetPort"]
+        "target_port": estado_service["spec"]["ports"][0]["targetPort"],
+        "type": estado_service["spec"]["type"]
     }
 
     return estado
@@ -135,29 +140,31 @@ def comparar(estado_deseado, estado_real):
     - estado_deseado (dict): Diccionario con los atributos y sus valores deseados.
     - estado_real (dict): Diccionario con los atributos y sus valores reales.
     """
-    print("\nComparación de atributos del Deployment:")
-    for clave in ["replicas", "image", "container_port"]:
+    tabla = PrettyTable()
+    tabla.field_names = ["Recurso", "Atributo", "Valor deseado", "Valor real"]
+
+    print("\nTabla de comparación de atributos del deployment y el service:")
+    drift = False
+    for clave in ["replicas", "image", "container_port", "container_name"]:
         valor_deseado = estado_deseado["deployment"].get(clave)
         valor_real = estado_real["deployment"].get(clave)
 
+        # Se comparan los valores y se detecta si hay drift o no
         if str(valor_deseado) != str(valor_real):
-            print(
-                f"Drift en {clave}: El valor deseado es {valor_deseado}"
-                f" y el valor real es {valor_real}")
-        else:
-            print(f"No hay drift para {clave}. El valor es {valor_real}.")
+            drift = True
+        tabla.add_row(["deployment", clave, valor_deseado, valor_real])
 
-    print("\nComparación de atributos del Service:")
-    for clave in ["port", "target_port"]:
+    for clave in ["port", "target_port", "type"]:
         valor_deseado = estado_deseado["service"].get(clave)
         valor_real = estado_real["service"].get(clave)
 
+        # Se comparan los valores y se detecta si hay drift o no
         if str(valor_deseado) != str(valor_real):
-            print(
-                f"Drift en {clave}: El valor deseado es {valor_deseado}"
-                f" y el valor real es {valor_real}")
-        else:
-            print(f"No hay drift para {clave}. El valor es {valor_real}.")
+            drift = True
+        tabla.add_row(["service", clave, valor_deseado, valor_real])
+
+    print(tabla)
+    return drift
 
 
 if __name__ == "__main__":
@@ -167,4 +174,8 @@ if __name__ == "__main__":
             "iac/terraform.tfstate"))
     estado_deseado = obtener_estado_deseado(tfstate)
     estado_real = obtener_estado_real()
-    comparar(estado_deseado, estado_real)
+    drift = comparar(estado_deseado, estado_real)
+    if drift:
+        exit(1)
+    else:
+        exit(0)
