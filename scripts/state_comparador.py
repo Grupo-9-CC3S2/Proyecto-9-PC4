@@ -2,6 +2,7 @@ import json
 import subprocess
 import os
 from prettytable import PrettyTable
+import requests
 
 CARPETA_ACTUAL = os.path.abspath(__file__)
 CARPETA_RAIZ = os.path.dirname(os.path.dirname(CARPETA_ACTUAL))
@@ -9,6 +10,8 @@ CARPETA_RAIZ = os.path.dirname(os.path.dirname(CARPETA_ACTUAL))
 NOMBRE_DEPLOYMENT = ""
 NOMBRE_SERVICE = ""
 
+webhook_slack = "https://hooks.slack.com/services/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"
+mensaje = {"text": "Se ha detectado un drift!"}
 
 def cargar_tfstate(ruta):
     """
@@ -176,6 +179,13 @@ if __name__ == "__main__":
     estado_real = obtener_estado_real()
     drift = comparar(estado_deseado, estado_real)
     if drift:
+        # Se hace una solicitud POST a slack
+        respuesta = requests.post (webhook_slack, json=mensaje)
+        if respuesta.status_code == 200:
+            print ("Mensaje enviado a canal de Slack")
+        else:
+            print ("Error", respuesta.text)
+        
         exit(1)
     else:
         exit(0)
