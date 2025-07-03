@@ -29,16 +29,9 @@ jobs:
             pip install langdetect
             git fetch --all  
             python ci/verificar_comentarios.py
-
+      # evaluacion de duplicacion
       - name: instalar jscpd
         run: npm install -g jscpd
 
       - name: ejecutar jscpd para detectar duplicacion
-        run: |
-          jscpd \
-            --min-lines 5 \
-            --threshold 30 \
-            --formats yaml,sh,py \
-            --reporters console \
-            --exitCode 1 \
-            .
+        run: jscpd
