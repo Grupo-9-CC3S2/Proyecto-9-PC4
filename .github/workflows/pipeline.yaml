@@ -13,12 +13,19 @@ jobs:
       - name: Revisar el repositorio
         uses: actions/checkout@v3
 
-      - name: instalar dependencias
+      - name: Instalar dependencias
         run: |
           sudo apt-get update
           sudo apt-get install -y python3 python3-pip 
-          pip3 install pytest prettytable
+          pip3 install -r requirements.txt
 
-      - name: ejecutar tests con Pytest
+      - name: Ejecutar tests con Pytest
         run: |
           pytest tests/test_state_comparador.py -v
+
+      # Se usa un script para verificar si están en español
+      - name: Verificar existencia de comentarios (en español)
+        run: |
+            pip install langdetect
+            git fetch --all  
+            python ci/verificar_comentarios.py
