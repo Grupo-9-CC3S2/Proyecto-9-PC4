@@ -22,3 +22,10 @@ jobs:
       - name: Ejecutar tests con Pytest
         run: |
           pytest tests/test_state_comparador.py -v
+
+      # Se usa un script para verificar si están en español
+      - name: Verificar existencia de comentarios (en español)
+        run: |
+            pip install langdetect
+            git fetch --all  
+            python ci/verificar_comentarios.py
