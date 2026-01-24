@@ -1,0 +1,11 @@
+{
+    "minLines": 5,
+    "threshold": 30,
+    "exitCode": 1,
+    "reporters": ["console"],
+    "path": ["."],
+    "ignore": [
+      "**/tests/**"
+    ]
+  }
+  
